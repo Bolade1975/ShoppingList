@@ -46,7 +46,7 @@ describe('validateListExportFile', () => {
     const file = { ...validFile(), schemaVersion: LIST_EXPORT_SCHEMA_VERSION + 1 }
     const result = validateListExportFile(file)
     expect(result.valid).toBe(false)
-    if (!result.valid) expect(result.error).toMatch(/newer version/)
+    if (!result.valid) expect(result.error).toMatch(/nyere version/)
   })
 
   it('rejects an item missing a required field', () => {

@@ -5,8 +5,9 @@ import { createListFromHistory, getList } from '../../db/listRepository'
 import { db } from '../../db/schema'
 import { shareList } from '../../db/shareRepository'
 import { listUnits } from '../../db/unitRepository'
+import { displayCategoryLabel, displayUnitLabel } from '../../domain/builtInLabels'
 import { formatDisplayDate } from '../../domain/formatDate'
-import { groupItemsByCategory } from '../../domain/listItems'
+import { displayQuantity, groupItemsByCategory } from '../../domain/listItems'
 import type { ListItem } from '../../domain/types'
 import { strings } from '../../strings'
 
@@ -16,7 +17,12 @@ type HistoryDetailScreenProps = {
 }
 
 function itemMeta(item: ListItem, unitName: string | undefined): string {
-  return [item.quantity, unitName].filter(Boolean).join(' ')
+  return [
+    displayQuantity(item.quantity),
+    unitName !== undefined ? displayUnitLabel(unitName) : undefined,
+  ]
+    .filter(Boolean)
+    .join(' ')
 }
 
 export function HistoryDetailScreen({ listId, onBack }: HistoryDetailScreenProps) {
@@ -116,7 +122,7 @@ export function HistoryDetailScreen({ listId, onBack }: HistoryDetailScreenProps
 
       {groups.map((group) => (
         <div key={group.categoryId ?? 'other'} className="category-group">
-          <h2 className="category-group__heading">{group.label}</h2>
+          <h2 className="category-group__heading">{displayCategoryLabel(group.label)}</h2>
           <ul className="item-list">
             {group.items.map((item) => {
               const unitName = units.find((unit) => unit.id === item.unitId)?.name

@@ -84,13 +84,14 @@ export function validateBackupFile(raw: unknown): BackupParseResult {
   if (!result.success) {
     return {
       valid: false,
-      error: 'This file is not a valid Shopping List backup (unrecognized structure).',
+      error: 'Denne fil er ikke en gyldig Indkøbsliste-sikkerhedskopi (ukendt struktur).',
     }
   }
   if (result.data.schemaVersion > BACKUP_SCHEMA_VERSION) {
     return {
       valid: false,
-      error: 'This backup was created by a newer version of the app and cannot be restored here.',
+      error:
+        'Denne sikkerhedskopi blev oprettet af en nyere version af appen og kan ikke gendannes her.',
     }
   }
   return { valid: true, backup: result.data }

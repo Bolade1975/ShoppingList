@@ -39,13 +39,13 @@ export function validateListExportFile(raw: unknown): ListExportParseResult {
   if (!result.success) {
     return {
       valid: false,
-      error: 'This file is not a valid shopping list export (unrecognized structure).',
+      error: 'Denne fil er ikke en gyldig indkøbsliste-eksport (ukendt struktur).',
     }
   }
   if (result.data.schemaVersion > LIST_EXPORT_SCHEMA_VERSION) {
     return {
       valid: false,
-      error: 'This file was exported by a newer version of the app and cannot be imported here.',
+      error: 'Denne fil blev eksporteret af en nyere version af appen og kan ikke importeres her.',
     }
   }
   return { valid: true, file: result.data }

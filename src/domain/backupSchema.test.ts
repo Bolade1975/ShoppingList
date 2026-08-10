@@ -65,6 +65,6 @@ describe('validateBackupFile', () => {
       schemaVersion: BACKUP_SCHEMA_VERSION + 1,
     })
     expect(result.valid).toBe(false)
-    if (!result.valid) expect(result.error).toMatch(/newer version/)
+    if (!result.valid) expect(result.error).toMatch(/nyere version/)
   })
 })

@@ -1,6 +1,7 @@
 import { useLiveQuery } from 'dexie-react-hooks'
 import { useState } from 'react'
 import { ItemForm } from '../../components/ItemForm'
+import { QuickAddItemForm } from '../../components/QuickAddItemForm'
 import { listCategories } from '../../db/categoryRepository'
 import { db } from '../../db/schema'
 import {
@@ -10,7 +11,8 @@ import {
   getTemplate,
 } from '../../db/templateRepository'
 import { listUnits } from '../../db/unitRepository'
-import { groupItemsByCategory } from '../../domain/listItems'
+import { displayCategoryLabel } from '../../domain/builtInLabels'
+import { displayQuantity, groupItemsByCategory } from '../../domain/listItems'
 import type { NewListItemInput, TemplateItem } from '../../domain/types'
 import { strings } from '../../strings'
 
@@ -19,8 +21,10 @@ type TemplateDetailScreenProps = {
   onBack: () => void
 }
 
-function itemMeta(item: TemplateItem, unitName: string | undefined): string {
-  return [item.quantity, unitName].filter(Boolean).join(' ')
+function itemAriaLabel(item: TemplateItem): string {
+  return strings.templateDetail.itemRowAriaTemplate
+    .replace('{name}', item.name)
+    .replace('{quantity}', displayQuantity(item.quantity))
 }
 
 export function TemplateDetailScreen({ templateId, onBack }: TemplateDetailScreenProps) {
@@ -69,16 +73,7 @@ export function TemplateDetailScreen({ templateId, onBack }: TemplateDetailScree
       </button>
       <h1 className="screen__title">{template.name}</h1>
 
-      <div className="quick-add">
-        <p className="quick-add__heading">{strings.templateDetail.addItemHeading}</p>
-        <ItemForm
-          categories={categories}
-          units={units}
-          submitLabel={strings.templateDetail.addButton}
-          resetAfterSubmit
-          onSubmit={handleAdd}
-        />
-      </div>
+      <QuickAddItemForm categories={categories} onSubmit={handleAdd} />
 
       {template.items.length === 0 && (
         <p className="screen__placeholder">{strings.templateDetail.emptyItems}</p>
@@ -86,7 +81,7 @@ export function TemplateDetailScreen({ templateId, onBack }: TemplateDetailScree
 
       {groups.map((group) => (
         <div key={group.categoryId ?? 'other'} className="category-group">
-          <h2 className="category-group__heading">{group.label}</h2>
+          <h2 className="category-group__heading">{displayCategoryLabel(group.label)}</h2>
           <ul className="item-list">
             {group.items.map((groupedItem) => {
               const item = template.items.find((candidate) => candidate.id === groupedItem.id)!
@@ -114,28 +109,22 @@ export function TemplateDetailScreen({ templateId, onBack }: TemplateDetailScree
                 )
               }
 
-              const unitName = units.find((unit) => unit.id === item.unitId)?.name
-
               return (
                 <li key={item.id} className="item-row">
-                  <span className="item-row__body">
+                  <span className="item-row__quantity">{displayQuantity(item.quantity)}</span>
+                  <button
+                    type="button"
+                    className="item-row__name-button"
+                    aria-label={itemAriaLabel(item)}
+                    onClick={() => setEditingItemId(item.id)}
+                  >
                     <span className="item-row__name">{item.name}</span>
-                    <span className="item-row__meta">{itemMeta(item, unitName)}</span>
-                    {item.note && <span className="item-row__note">{item.note}</span>}
-                  </span>
+                  </button>
                   <span className="item-row__actions">
                     <button
                       type="button"
                       className="icon-button"
-                      aria-label="Edit item"
-                      onClick={() => setEditingItemId(item.id)}
-                    >
-                      ✎
-                    </button>
-                    <button
-                      type="button"
-                      className="icon-button"
-                      aria-label="Delete item"
+                      aria-label={strings.templateDetail.deleteItemAria}
                       onClick={() => setDeleteConfirmId(item.id)}
                     >
                       ✕

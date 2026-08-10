@@ -2,6 +2,7 @@ import { useLiveQuery } from 'dexie-react-hooks'
 import { type FormEvent, useState } from 'react'
 import { searchArchivedItems } from '../db/itemArchiveRepository'
 import { db } from '../db/schema'
+import { displayCategoryLabel, displayUnitLabel } from '../domain/builtInLabels'
 import type { ArchivedItem, Category, NewListItemInput, Unit } from '../domain/types'
 import { strings } from '../strings'
 
@@ -20,7 +21,12 @@ type ItemFormProps = {
 function suggestionMeta(item: ArchivedItem, categories: Category[], units: Unit[]): string {
   const categoryName = categories.find((c) => c.id === item.categoryId)?.name
   const unitName = units.find((u) => u.id === item.unitId)?.name
-  return [categoryName, unitName].filter((value): value is string => Boolean(value)).join(' · ')
+  return [
+    categoryName !== undefined ? displayCategoryLabel(categoryName) : undefined,
+    unitName !== undefined ? displayUnitLabel(unitName) : undefined,
+  ]
+    .filter((value): value is string => Boolean(value))
+    .join(' · ')
 }
 
 export function ItemForm({
@@ -68,11 +74,11 @@ export function ItemForm({
   function handleSubmit(event: FormEvent) {
     event.preventDefault()
     if (!name.trim()) {
-      setError('Item name is required.')
+      setError(strings.common.nameRequiredError)
       return
     }
     if (!quantity.trim()) {
-      setError('Quantity is required.')
+      setError(strings.listDetail.quantityRequiredError)
       return
     }
     setError(null)
@@ -149,7 +155,7 @@ export function ItemForm({
             <option value="">{strings.common.none}</option>
             {units.map((unit) => (
               <option key={unit.id} value={unit.id}>
-                {unit.name}
+                {displayUnitLabel(unit.name)}
               </option>
             ))}
           </select>
@@ -168,7 +174,7 @@ export function ItemForm({
           <option value="">{strings.common.other}</option>
           {categories.map((category) => (
             <option key={category.id} value={category.id}>
-              {category.name}
+              {displayCategoryLabel(category.name)}
             </option>
           ))}
         </select>

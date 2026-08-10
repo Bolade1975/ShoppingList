@@ -37,7 +37,7 @@ export function ListsHomeScreen({ onSelect }: ListsHomeScreenProps) {
 
   async function handleCreate() {
     if (!newName.trim()) {
-      setError('List name is required.')
+      setError(strings.lists.nameRequiredError)
       return
     }
     const list = await createList(db, newName)
@@ -161,7 +161,7 @@ export function ListsHomeScreen({ onSelect }: ListsHomeScreenProps) {
                 <button
                   type="button"
                   className="icon-button"
-                  aria-label="More actions"
+                  aria-label={strings.a11y.moreActions}
                   onClick={() =>
                     setActive(
                       isActive && panel?.kind === 'menu'

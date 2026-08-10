@@ -98,7 +98,7 @@ export async function duplicateList(
   const now = nowIso()
   const list: ShoppingList = {
     id: generateId(),
-    name: name?.trim() || `${source.name} (copy)`,
+    name: name?.trim() || `${source.name} (kopi)`,
     status: 'active',
     items: source.items.map((item) => ({ ...item, id: generateId(), updatedAt: now })),
     createdAt: now,

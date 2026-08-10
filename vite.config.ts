@@ -22,9 +22,10 @@ export default defineConfig({
       },
       manifest: {
         id: '/',
-        name: 'Shopping List',
-        short_name: 'Shopping',
-        description: 'Offline shopping list — all data stays on your device.',
+        lang: 'da',
+        name: 'Indkøbsliste',
+        short_name: 'Indkøb',
+        description: 'Offline indkøbsliste — alle data forbliver på din enhed.',
         start_url: '.',
         scope: '.',
         display: 'standalone',

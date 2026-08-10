@@ -73,3 +73,31 @@ export function groupItemsByCategory(items: ListItem[], categories: Category[]):
   }
   return result
 }
+
+/**
+ * Category groups for the not-completed items only — used together with
+ * `getCompletedItems` so a list's completed items sit in one flat section
+ * below every category, instead of at the bottom of each category.
+ */
+export function groupActiveItemsByCategory(items: ListItem[], categories: Category[]): ItemGroup[] {
+  return groupItemsByCategory(
+    items.filter((item) => !item.completed),
+    categories,
+  )
+}
+
+/** All completed items across every category, alphabetical — the flat "completed" section at the bottom of an active list. */
+export function getCompletedItems(items: ListItem[]): ListItem[] {
+  return items.filter((item) => item.completed).sort((a, b) => a.name.localeCompare(b.name))
+}
+
+/**
+ * A quantity safe to display: falls back to "1" for the rare case of a
+ * blank/whitespace-only stored quantity (e.g. very old data from before
+ * quantity was required). Never writes anything back to storage — purely a
+ * rendering fallback.
+ */
+export function displayQuantity(quantity: string): string {
+  const trimmed = quantity.trim()
+  return trimmed === '' ? '1' : trimmed
+}

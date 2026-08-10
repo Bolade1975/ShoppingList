@@ -8,6 +8,7 @@ import {
 } from '../../db/itemArchiveRepository'
 import { db } from '../../db/schema'
 import { listUnits } from '../../db/unitRepository'
+import { displayCategoryLabel, displayUnitLabel } from '../../domain/builtInLabels'
 import type { ArchivedItem } from '../../domain/types'
 import { strings } from '../../strings'
 
@@ -69,6 +70,9 @@ export function ArchiveSection() {
           const panel = isActive ? active.panel : null
           const categoryName = categories.find((c) => c.id === item.categoryId)?.name
           const unitName = units.find((u) => u.id === item.unitId)?.name
+          const categoryDisplay =
+            categoryName !== undefined ? displayCategoryLabel(categoryName) : undefined
+          const unitDisplay = unitName !== undefined ? displayUnitLabel(unitName) : undefined
 
           return (
             <li key={item.id} className="entry-row">
@@ -91,13 +95,14 @@ export function ArchiveSection() {
                   <span className="entry-row__name">{item.name}</span>
                   <br />
                   <span className="entry-row__meta">
-                    {[categoryName, unitName].filter(Boolean).join(' · ') || strings.common.none}
+                    {[categoryDisplay, unitDisplay].filter(Boolean).join(' · ') ||
+                      strings.common.none}
                   </span>
                 </button>
                 <button
                   type="button"
                   className="icon-button"
-                  aria-label="Delete from archive"
+                  aria-label={strings.archive.deleteFromArchiveAria}
                   onClick={() => setActive({ itemId: item.id, panel: { kind: 'deleteConfirm' } })}
                 >
                   ✕
@@ -134,7 +139,7 @@ export function ArchiveSection() {
                         <option value="">{strings.common.other}</option>
                         {categories.map((category) => (
                           <option key={category.id} value={category.id}>
-                            {category.name}
+                            {displayCategoryLabel(category.name)}
                           </option>
                         ))}
                       </select>
@@ -153,7 +158,7 @@ export function ArchiveSection() {
                         <option value="">{strings.common.none}</option>
                         {units.map((unit) => (
                           <option key={unit.id} value={unit.id}>
-                            {unit.name}
+                            {displayUnitLabel(unit.name)}
                           </option>
                         ))}
                       </select>

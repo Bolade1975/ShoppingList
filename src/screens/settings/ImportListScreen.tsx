@@ -30,9 +30,7 @@ export function ImportListScreen({ onBack }: ImportListScreenProps) {
       const text = await file.text()
       raw = JSON.parse(text)
     } catch {
-      setError(
-        `This is not a valid ${strings.importList.invalidFile} — it could not be read as JSON.`,
-      )
+      setError(strings.importList.invalidFileError)
       return
     }
 
@@ -43,7 +41,7 @@ export function ImportListScreen({ onBack }: ImportListScreenProps) {
     }
     setLoaded({ file: result.file, preview: result.preview })
     setNewName(
-      result.preview.nameConflict ? `${result.preview.name} (imported)` : result.preview.name,
+      result.preview.nameConflict ? `${result.preview.name} (importeret)` : result.preview.name,
     )
   }
 

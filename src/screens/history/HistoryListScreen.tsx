@@ -78,7 +78,7 @@ export function HistoryListScreen({ onSelect }: HistoryListScreenProps) {
                 <button
                   type="button"
                   className="icon-button"
-                  aria-label="More actions"
+                  aria-label={strings.a11y.moreActions}
                   onClick={() =>
                     setActive(
                       isActive && panel?.kind === 'menu'

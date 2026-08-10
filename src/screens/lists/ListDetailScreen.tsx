@@ -1,6 +1,7 @@
 import { useLiveQuery } from 'dexie-react-hooks'
 import { useEffect, useRef, useState } from 'react'
 import { ItemForm } from '../../components/ItemForm'
+import { QuickAddItemForm } from '../../components/QuickAddItemForm'
 import { Toast } from '../../components/Toast'
 import { listCategories } from '../../db/categoryRepository'
 import {
@@ -16,8 +17,14 @@ import {
 import { db } from '../../db/schema'
 import { shareList } from '../../db/shareRepository'
 import { listUnits } from '../../db/unitRepository'
-import { findItemByName, groupItemsByCategory } from '../../domain/listItems'
-import type { ListItem, NewListItemInput } from '../../domain/types'
+import { displayCategoryLabel } from '../../domain/builtInLabels'
+import {
+  displayQuantity,
+  findItemByName,
+  getCompletedItems,
+  groupActiveItemsByCategory,
+} from '../../domain/listItems'
+import type { Category, ListItem, NewListItemInput } from '../../domain/types'
 import { strings } from '../../strings'
 
 type ListDetailScreenProps = {
@@ -31,8 +38,15 @@ type UndoState =
 
 const UNDO_TIMEOUT_MS = 6000
 
-function itemMeta(item: ListItem, unitName: string | undefined): string {
-  return [item.quantity, unitName].filter(Boolean).join(' ')
+function itemAriaLabel(item: ListItem): string {
+  return strings.listDetail.itemRowAriaTemplate
+    .replace('{name}', item.name)
+    .replace('{quantity}', displayQuantity(item.quantity))
+}
+
+function categoryHintFor(item: ListItem, categories: Category[]): string {
+  const category = categories.find((candidate) => candidate.id === item.categoryId)
+  return displayCategoryLabel(category?.name ?? strings.common.other)
 }
 
 export function ListDetailScreen({ listId, onBack }: ListDetailScreenProps) {
@@ -132,10 +146,74 @@ export function ListDetailScreen({ listId, onBack }: ListDetailScreenProps) {
     await shareList(db, list!)
   }
 
+  function renderItemRow(item: ListItem, showCategoryHint: boolean) {
+    if (editingItemId === item.id) {
+      return (
+        <li key={item.id}>
+          <div className="quick-add">
+            <ItemForm
+              categories={categories}
+              units={units}
+              submitLabel={strings.common.save}
+              initialValue={{
+                name: item.name,
+                quantity: item.quantity,
+                ...(item.unitId !== undefined ? { unitId: item.unitId } : {}),
+                ...(item.categoryId !== undefined ? { categoryId: item.categoryId } : {}),
+                ...(item.note !== undefined ? { note: item.note } : {}),
+              }}
+              onSubmit={(input) => handleEditSubmit(item.id, input)}
+              onCancel={() => setEditingItemId(null)}
+            />
+          </div>
+        </li>
+      )
+    }
+
+    const index = list!.items.findIndex((candidate) => candidate.id === item.id)
+
+    return (
+      <li key={item.id} className="item-row" data-completed={item.completed}>
+        <button
+          type="button"
+          className="item-row__checkbox"
+          aria-label={
+            item.completed ? strings.listDetail.reopenAria : strings.listDetail.crossOffAria
+          }
+          onClick={() => handleToggleComplete(item)}
+        >
+          {item.completed ? '✓' : ''}
+        </button>
+        <span className="item-row__quantity">{displayQuantity(item.quantity)}</span>
+        <button
+          type="button"
+          className="item-row__name-button"
+          aria-label={itemAriaLabel(item)}
+          onClick={() => setEditingItemId(item.id)}
+        >
+          <span className="item-row__name">{item.name}</span>
+          {showCategoryHint && (
+            <span className="item-row__category-hint">{categoryHintFor(item, categories)}</span>
+          )}
+        </button>
+        <span className="item-row__actions">
+          <button
+            type="button"
+            className="icon-button"
+            aria-label={strings.listDetail.deleteItemAria}
+            onClick={() => handleDelete(item, index)}
+          >
+            ✕
+          </button>
+        </span>
+      </li>
+    )
+  }
+
   const hideCompleted = Boolean(list.hideCompleted)
-  const visibleItems = hideCompleted ? list.items.filter((item) => !item.completed) : list.items
-  const groups = groupItemsByCategory(visibleItems, categories)
-  const hasCompleted = list.items.some((item) => item.completed)
+  const activeGroups = groupActiveItemsByCategory(list.items, categories)
+  const completedItems = getCompletedItems(list.items)
+  const hasCompleted = completedItems.length > 0
 
   return (
     <div>
@@ -150,16 +228,7 @@ export function ListDetailScreen({ listId, onBack }: ListDetailScreenProps) {
         </button>
       </div>
 
-      <div className="quick-add">
-        <p className="quick-add__heading">{strings.listDetail.addItemHeading}</p>
-        <ItemForm
-          categories={categories}
-          units={units}
-          submitLabel={strings.listDetail.addButton}
-          resetAfterSubmit
-          onSubmit={handleAddItem}
-        />
-      </div>
+      <QuickAddItemForm categories={categories} onSubmit={handleAddItem} />
 
       {pendingDuplicate && (
         <div className="duplicate-warning">
@@ -180,90 +249,29 @@ export function ListDetailScreen({ listId, onBack }: ListDetailScreenProps) {
         </div>
       )}
 
+      {list.items.length === 0 && (
+        <p className="screen__placeholder">{strings.listDetail.emptyItems}</p>
+      )}
+
+      {activeGroups.map((group) => (
+        <div key={group.categoryId ?? 'other'} className="category-group">
+          <h2 className="category-group__heading">{displayCategoryLabel(group.label)}</h2>
+          <ul className="item-list">{group.items.map((item) => renderItemRow(item, false))}</ul>
+        </div>
+      ))}
+
       {hasCompleted && (
         <button type="button" className="completed-toggle" onClick={handleToggleHideCompleted}>
           {hideCompleted ? strings.listDetail.showCompleted : strings.listDetail.hideCompleted}
         </button>
       )}
 
-      {list.items.length === 0 && (
-        <p className="screen__placeholder">{strings.listDetail.emptyItems}</p>
-      )}
-
-      {groups.map((group) => (
-        <div key={group.categoryId ?? 'other'} className="category-group">
-          <h2 className="category-group__heading">{group.label}</h2>
-          <ul className="item-list">
-            {group.items.map((item) => {
-              if (editingItemId === item.id) {
-                return (
-                  <li key={item.id}>
-                    <div className="quick-add">
-                      <ItemForm
-                        categories={categories}
-                        units={units}
-                        submitLabel={strings.common.save}
-                        initialValue={{
-                          name: item.name,
-                          quantity: item.quantity,
-                          ...(item.unitId !== undefined ? { unitId: item.unitId } : {}),
-                          ...(item.categoryId !== undefined ? { categoryId: item.categoryId } : {}),
-                          ...(item.note !== undefined ? { note: item.note } : {}),
-                        }}
-                        onSubmit={(input) => handleEditSubmit(item.id, input)}
-                        onCancel={() => setEditingItemId(null)}
-                      />
-                    </div>
-                  </li>
-                )
-              }
-
-              const unitName = units.find((unit) => unit.id === item.unitId)?.name
-              const index = list.items.findIndex((candidate) => candidate.id === item.id)
-
-              return (
-                <li key={item.id} className="item-row" data-completed={item.completed}>
-                  <button
-                    type="button"
-                    className="item-row__checkbox"
-                    aria-label={item.completed ? 'Reopen item' : 'Cross off item'}
-                    onClick={() => handleToggleComplete(item)}
-                  >
-                    {item.completed ? '✓' : ''}
-                  </button>
-                  <button
-                    type="button"
-                    className="item-row__body"
-                    onClick={() => handleToggleComplete(item)}
-                  >
-                    <span className="item-row__name">{item.name}</span>
-                    <span className="item-row__meta">{itemMeta(item, unitName)}</span>
-                    {item.note && <span className="item-row__note">{item.note}</span>}
-                  </button>
-                  <span className="item-row__actions">
-                    <button
-                      type="button"
-                      className="icon-button"
-                      aria-label="Edit item"
-                      onClick={() => setEditingItemId(item.id)}
-                    >
-                      ✎
-                    </button>
-                    <button
-                      type="button"
-                      className="icon-button"
-                      aria-label="Delete item"
-                      onClick={() => handleDelete(item, index)}
-                    >
-                      ✕
-                    </button>
-                  </span>
-                </li>
-              )
-            })}
-          </ul>
+      {hasCompleted && !hideCompleted && (
+        <div className="category-group category-group--completed">
+          <h2 className="category-group__heading">{strings.listDetail.completedHeading}</h2>
+          <ul className="item-list">{completedItems.map((item) => renderItemRow(item, true))}</ul>
         </div>
-      ))}
+      )}
 
       {undoState && (
         <Toast

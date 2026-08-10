@@ -42,7 +42,7 @@ export function BackupScreen({ onBack }: BackupScreenProps) {
       const text = await file.text()
       raw = JSON.parse(text)
     } catch {
-      setError('This file could not be read as JSON.')
+      setError(strings.backup.invalidFileError)
       return
     }
 

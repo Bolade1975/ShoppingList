@@ -241,6 +241,19 @@ button {
   min-height: 36px;
 }
 
+/* Visually hidden but still announced by screen readers. */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
 /* Generic rows list (lists / templates / history / archive home screens) */
 
 .entry-list {
@@ -359,6 +372,64 @@ button {
   margin: 0.6rem 0;
 }
 
+/* Compact "Name + Category" quick-add row (Lists / Templates) */
+
+.quick-add-row {
+  margin-bottom: 1.25rem;
+}
+
+.quick-add-row__fields {
+  display: flex;
+  align-items: stretch;
+  gap: 0.4rem;
+}
+
+.quick-add-row__name {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.quick-add-row__name input {
+  width: 100%;
+  min-height: 44px;
+  padding: 0.55rem 0.65rem;
+  border: 1px solid var(--color-border);
+  border-radius: 0.5rem;
+  background: var(--color-surface);
+  color: var(--color-text);
+  font: inherit;
+}
+
+.quick-add-row__category {
+  flex: 0 0 auto;
+  width: 6.25rem;
+  max-width: 36vw;
+  min-height: 44px;
+  padding: 0.4rem 0.3rem;
+  border: 1px solid var(--color-border);
+  border-radius: 0.5rem;
+  background: var(--color-surface);
+  color: var(--color-text);
+  font: inherit;
+  font-size: 0.8rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.quick-add-row__submit {
+  flex: 0 0 auto;
+  width: 44px;
+  min-height: 44px;
+  border: none;
+  border-radius: 0.5rem;
+  background: var(--color-accent);
+  color: #ffffff;
+  font-size: 1.4rem;
+  font-weight: 700;
+  line-height: 1;
+}
+
 .autocomplete {
   position: relative;
 }
@@ -447,15 +518,15 @@ button {
 
 .item-row__checkbox {
   flex: 0 0 auto;
-  width: 28px;
-  height: 28px;
-  margin-top: 0.1rem;
+  width: 40px;
+  height: 40px;
   border-radius: 50%;
   border: 1.5px solid var(--color-border);
   background: var(--color-surface);
   display: flex;
   align-items: center;
   justify-content: center;
+  font-size: 1.1rem;
 }
 
 .item-row[data-completed='true'] .item-row__checkbox {
@@ -464,13 +535,28 @@ button {
   color: #ffffff;
 }
 
-.item-row__body {
+.item-row__quantity {
+  flex: 0 0 auto;
+  min-width: 1.9rem;
+  padding-top: 0.6rem;
+  text-align: center;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: var(--color-text-muted);
+}
+
+.item-row[data-completed='true'] .item-row__quantity {
+  color: var(--color-success);
+}
+
+.item-row__body,
+.item-row__name-button {
   flex: 1 1 auto;
   min-width: 0;
   text-align: left;
   background: none;
   border: none;
-  padding: 0;
+  padding: 0.5rem 0 0;
   color: inherit;
 }
 
@@ -498,6 +584,14 @@ button {
   color: var(--color-text-muted);
   font-size: 0.8rem;
   font-style: italic;
+  margin-top: 0.1rem;
+}
+
+/* Compact category indication shown only in the completed section, where items from every category are mixed together. */
+.item-row__category-hint {
+  display: block;
+  color: var(--color-text-muted);
+  font-size: 0.75rem;
   margin-top: 0.1rem;
 }
 

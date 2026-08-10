@@ -24,6 +24,8 @@ describe('buildListExport / importList round trip', () => {
     const imported = await importList(db, exported)
     expect(imported.id).not.toBe(source.id)
     expect(imported.items[0]!.name).toBe('Milk')
+    // Imported items keep the quantity stored in the file, not a fresh default.
+    expect(imported.items[0]!.quantity).toBe('2')
     // Category name resolved back to this device's own Dairy category id.
     expect(imported.items[0]!.categoryId).toBe(dairy.id)
 

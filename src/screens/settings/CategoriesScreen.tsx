@@ -8,6 +8,7 @@ import {
   reorderCategories,
 } from '../../db/categoryRepository'
 import { db } from '../../db/schema'
+import { displayCategoryLabel } from '../../domain/builtInLabels'
 import type { Category } from '../../domain/types'
 import { strings } from '../../strings'
 
@@ -104,11 +105,11 @@ export function CategoriesScreen({ onBack }: CategoriesScreenProps) {
             </div>
           ) : (
             <div className="reorder-row">
-              <span className="reorder-row__name">{category.name}</span>
+              <span className="reorder-row__name">{displayCategoryLabel(category.name)}</span>
               <div className="reorder-row__buttons">
                 <button
                   type="button"
-                  aria-label="Move up"
+                  aria-label={strings.categories.moveUpAria}
                   disabled={index === 0}
                   onClick={() => handleMove(index, -1)}
                 >
@@ -116,7 +117,7 @@ export function CategoriesScreen({ onBack }: CategoriesScreenProps) {
                 </button>
                 <button
                   type="button"
-                  aria-label="Move down"
+                  aria-label={strings.categories.moveDownAria}
                   disabled={index === categories.length - 1}
                   onClick={() => handleMove(index, 1)}
                 >
@@ -124,17 +125,17 @@ export function CategoriesScreen({ onBack }: CategoriesScreenProps) {
                 </button>
                 <button
                   type="button"
-                  aria-label="Rename"
+                  aria-label={strings.categories.renameAria}
                   onClick={() => {
                     setRenamingId(category.id)
-                    setRenameValue(category.name)
+                    setRenameValue(displayCategoryLabel(category.name))
                   }}
                 >
                   ✎
                 </button>
                 <button
                   type="button"
-                  aria-label="Delete"
+                  aria-label={strings.categories.deleteAria}
                   onClick={() => setDeleteConfirmId(category.id)}
                 >
                   ✕

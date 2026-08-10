@@ -158,9 +158,9 @@ describe('duplicateList', () => {
 })
 
 describe('archiveList / listArchivedLists / createListFromHistory', () => {
-  it('archives a list into history and restores an independent, fresh-start copy from it', async () => {
+  it('archives a list into history and restores an independent, fresh-start copy from it, keeping the stored quantity', async () => {
     const list = await createList(db, 'Groceries')
-    const withItem = await addItem(db, list.id, { name: 'Milk', quantity: '1' })
+    const withItem = await addItem(db, list.id, { name: 'Milk', quantity: '5' })
     await setItemCompleted(db, list.id, withItem.items[0]!.id, true)
 
     const archived = await archiveList(db, list.id)
@@ -172,6 +172,9 @@ describe('archiveList / listArchivedLists / createListFromHistory', () => {
     expect(restored.status).toBe('active')
     expect(restored.id).not.toBe(list.id)
     expect(restored.items[0]!.completed).toBe(false)
+    // A restored item keeps whatever quantity it had in history — the "new
+    // item defaults to 1" rule only applies to genuinely new items.
+    expect(restored.items[0]!.quantity).toBe('5')
 
     // The original archived list must be untouched.
     const originalStillArchived = await getList(db, list.id)
@@ -181,15 +184,16 @@ describe('archiveList / listArchivedLists / createListFromHistory', () => {
 })
 
 describe('createListFromTemplate', () => {
-  it('creates a fresh active list from a template without modifying the template', async () => {
+  it('creates a fresh active list from a template without modifying the template, keeping the stored quantity', async () => {
     const created = await createTemplate(db, 'Weekly staples')
-    const template = await addTemplateItem(db, created.id, { name: 'Milk', quantity: '1' })
+    const template = await addTemplateItem(db, created.id, { name: 'Milk', quantity: '3' })
 
     const list = await createListFromTemplate(db, template.id)
     expect(list.status).toBe('active')
     expect(list.items).toHaveLength(1)
     expect(list.items[0]!.completed).toBe(false)
     expect(list.items[0]!.id).not.toBe(template.items[0]!.id)
+    expect(list.items[0]!.quantity).toBe('3')
 
     await setItemCompleted(db, list.id, list.items[0]!.id, true)
     // Re-fetching the template must show it unchanged.

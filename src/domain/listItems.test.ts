@@ -2,7 +2,10 @@ import { describe, expect, it } from 'vitest'
 import {
   combineQuantities,
   countRemaining,
+  displayQuantity,
   findItemByName,
+  getCompletedItems,
+  groupActiveItemsByCategory,
   groupItemsByCategory,
 } from './listItems'
 import type { Category, ListItem } from './types'
@@ -107,5 +110,56 @@ describe('groupItemsByCategory', () => {
     ]
     const groups = groupItemsByCategory(items, categories)
     expect(groups[0]!.items.map((i) => i.name)).toEqual(['Milk', 'Butter'])
+  })
+})
+
+describe('groupActiveItemsByCategory', () => {
+  const categories: Category[] = [
+    { id: 'cat-produce', name: 'Fruit and vegetables', order: 0, createdAt: '' },
+    { id: 'cat-dairy', name: 'Dairy', order: 1, createdAt: '' },
+  ]
+
+  it('excludes completed items entirely, leaving only not-completed items grouped by category', () => {
+    const items = [
+      makeItem({ id: '1', name: 'Milk', categoryId: 'cat-dairy', completed: false }),
+      makeItem({ id: '2', name: 'Butter', categoryId: 'cat-dairy', completed: true }),
+      makeItem({ id: '3', name: 'Apple', categoryId: 'cat-produce', completed: false }),
+    ]
+    const groups = groupActiveItemsByCategory(items, categories)
+    expect(groups.map((g) => g.label)).toEqual(['Fruit and vegetables', 'Dairy'])
+    expect(groups.flatMap((g) => g.items.map((i) => i.name))).toEqual(['Apple', 'Milk'])
+  })
+
+  it('produces no groups at all when every item is completed', () => {
+    const items = [makeItem({ id: '1', name: 'Milk', categoryId: 'cat-dairy', completed: true })]
+    expect(groupActiveItemsByCategory(items, categories)).toEqual([])
+  })
+})
+
+describe('getCompletedItems', () => {
+  it('returns only completed items, across every category, sorted alphabetically', () => {
+    const items = [
+      makeItem({ id: '1', name: 'Zucchini', categoryId: 'cat-produce', completed: true }),
+      makeItem({ id: '2', name: 'Apple', categoryId: 'cat-produce', completed: false }),
+      makeItem({ id: '3', name: 'Butter', categoryId: 'cat-dairy', completed: true }),
+    ]
+    expect(getCompletedItems(items).map((i) => i.name)).toEqual(['Butter', 'Zucchini'])
+  })
+
+  it('returns an empty array when nothing is completed', () => {
+    expect(getCompletedItems([makeItem({ completed: false })])).toEqual([])
+  })
+})
+
+describe('displayQuantity', () => {
+  it('passes through a real quantity unchanged', () => {
+    expect(displayQuantity('2')).toBe('2')
+    expect(displayQuantity('2-3')).toBe('2-3')
+  })
+
+  it('falls back to "1" for a blank stored quantity without altering the source value', () => {
+    const stored = '   '
+    expect(displayQuantity(stored)).toBe('1')
+    expect(stored).toBe('   ')
   })
 })

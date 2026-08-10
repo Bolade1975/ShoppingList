@@ -2,6 +2,7 @@ import { useLiveQuery } from 'dexie-react-hooks'
 import { useState } from 'react'
 import { db } from '../../db/schema'
 import { createUnit, deleteUnit, listUnits, renameUnit } from '../../db/unitRepository'
+import { displayUnitLabel } from '../../domain/builtInLabels'
 import type { Unit } from '../../domain/types'
 import { strings } from '../../strings'
 
@@ -84,21 +85,21 @@ export function UnitsScreen({ onBack }: UnitsScreenProps) {
             </div>
           ) : (
             <div className="reorder-row">
-              <span className="reorder-row__name">{unit.name}</span>
+              <span className="reorder-row__name">{displayUnitLabel(unit.name)}</span>
               <div className="reorder-row__buttons">
                 <button
                   type="button"
-                  aria-label="Rename"
+                  aria-label={strings.units.renameAria}
                   onClick={() => {
                     setRenamingId(unit.id)
-                    setRenameValue(unit.name)
+                    setRenameValue(displayUnitLabel(unit.name))
                   }}
                 >
                   ✎
                 </button>
                 <button
                   type="button"
-                  aria-label="Delete"
+                  aria-label={strings.units.deleteAria}
                   onClick={() => setDeleteConfirmId(unit.id)}
                 >
                   ✕

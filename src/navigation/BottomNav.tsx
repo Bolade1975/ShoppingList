@@ -1,3 +1,4 @@
+import { strings } from '../strings'
 import { TABS, type TabId } from './tabs'
 
 type BottomNavProps = {
@@ -7,7 +8,7 @@ type BottomNavProps = {
 
 export function BottomNav({ activeTab, onSelectTab }: BottomNavProps) {
   return (
-    <nav className="bottom-nav" aria-label="Main">
+    <nav className="bottom-nav" aria-label={strings.a11y.mainNav}>
       {TABS.map((tab) => {
         const isActive = tab.id === activeTab
         const Icon = tab.icon
