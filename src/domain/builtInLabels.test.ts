@@ -15,6 +15,7 @@ describe('displayCategoryLabel', () => {
       'Drikkevarer',
       'Husholdning',
       'Personlig pleje',
+      'Kolonial',
       'Andet',
     ])
   })

@@ -20,7 +20,7 @@ import { listUnits } from '../../db/unitRepository'
 import { displayCategoryLabel } from '../../domain/builtInLabels'
 import {
   displayQuantity,
-  findItemByName,
+  findActiveItemByName,
   getCompletedItems,
   groupActiveItemsByCategory,
 } from '../../domain/listItems'
@@ -81,7 +81,7 @@ export function ListDetailScreen({ listId, onBack }: ListDetailScreenProps) {
   }
 
   async function handleAddItem(input: NewListItemInput) {
-    const existingItem = findItemByName(list!.items, input.name)
+    const existingItem = findActiveItemByName(list!.items, input.name)
     if (existingItem) {
       setPendingDuplicate({ input, existingItem })
       return

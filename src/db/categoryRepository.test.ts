@@ -22,6 +22,13 @@ describe('default seeding', () => {
     expect(categories[0]!.name).toBe('Fruit and vegetables')
     expect(categories.at(-1)!.name).toBe('Other')
   })
+
+  it('seeds "Kolonial" immediately before "Other" for a brand-new install', async () => {
+    const categories = await listCategories(db)
+    const names = categories.map((c) => c.name)
+    expect(names.at(-2)).toBe('Kolonial')
+    expect(names.at(-1)).toBe('Other')
+  })
 })
 
 describe('createCategory', () => {

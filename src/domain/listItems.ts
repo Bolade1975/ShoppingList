@@ -5,11 +5,25 @@ export function countRemaining(items: ListItem[]): number {
   return items.filter((item) => !item.completed).length
 }
 
-/** Case/whitespace-insensitive lookup, used to warn about likely duplicates before adding a new item. */
+/** Case/whitespace-insensitive lookup, matched against every item regardless of completed status. */
 export function findItemByName(items: ListItem[], name: string): ListItem | undefined {
   const normalized = name.trim().toLowerCase()
   if (!normalized) return undefined
   return items.find((item) => item.name.trim().toLowerCase() === normalized)
+}
+
+/**
+ * Same lookup as `findItemByName`, but scoped to not-completed items only —
+ * this is what the "already on this list" duplicate warning must use. A
+ * completed item with the same name is a closed, unrelated purchase: it
+ * must never trigger the warning, never be touched by "combine quantities",
+ * and its hidden/visible display state has no bearing on this check.
+ */
+export function findActiveItemByName(items: ListItem[], name: string): ListItem | undefined {
+  return findItemByName(
+    items.filter((item) => !item.completed),
+    name,
+  )
 }
 
 function parseNumericQuantity(value: string): number | undefined {

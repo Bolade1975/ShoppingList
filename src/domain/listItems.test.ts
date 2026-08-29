@@ -3,6 +3,7 @@ import {
   combineQuantities,
   countRemaining,
   displayQuantity,
+  findActiveItemByName,
   findItemByName,
   getCompletedItems,
   groupActiveItemsByCategory,
@@ -51,6 +52,36 @@ describe('findItemByName', () => {
 
   it('returns undefined when nothing matches', () => {
     expect(findItemByName([makeItem({ name: 'Milk' })], 'Bread')).toBeUndefined()
+  })
+
+  it('matches a completed item too — used elsewhere the completed state must not matter', () => {
+    const items = [makeItem({ name: 'Milk', completed: true })]
+    expect(findItemByName(items, 'Milk')).toBe(items[0])
+  })
+})
+
+describe('findActiveItemByName', () => {
+  it('matches an active (not-completed) item with the same name', () => {
+    const items = [makeItem({ id: 'a', name: 'Milk', completed: false })]
+    expect(findActiveItemByName(items, 'Milk')).toBe(items[0])
+  })
+
+  it('does not match a completed item, even when it is the only one with that name', () => {
+    const items = [makeItem({ id: 'a', name: 'Milk', completed: true })]
+    expect(findActiveItemByName(items, 'Milk')).toBeUndefined()
+  })
+
+  it('matches the active item when both an active and a completed item share the name', () => {
+    const completed = makeItem({ id: 'a', name: 'Milk', completed: true })
+    const active = makeItem({ id: 'b', name: 'Milk', completed: false })
+    const result = findActiveItemByName([completed, active], 'Milk')
+    expect(result).toBe(active)
+  })
+
+  it('is case- and whitespace-insensitive, same as findItemByName', () => {
+    const items = [makeItem({ name: 'Gulerødder', completed: false })]
+    expect(findActiveItemByName(items, '  gulerødder  ')).toBe(items[0])
+    expect(findActiveItemByName(items, 'GULERØDDER')).toBe(items[0])
   })
 })
 
