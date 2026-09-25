@@ -11,7 +11,7 @@ const CATEGORY_LABELS_DA: Readonly<Record<string, string>> = {
   'fruit and vegetables': 'Frugt og grønt',
   dairy: 'Mejeriprodukter',
   'meat and fish': 'Kød og fisk',
-  cheese: 'Ost',
+  cheese: 'Ost og pålæg',
   'bread and bakery': 'Brød og bager',
   frozen: 'Frostvarer',
   drinks: 'Drikkevarer',

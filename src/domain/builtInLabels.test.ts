@@ -9,7 +9,7 @@ describe('displayCategoryLabel', () => {
       'Frugt og grønt',
       'Mejeriprodukter',
       'Kød og fisk',
-      'Ost',
+      'Ost og pålæg',
       'Brød og bager',
       'Frostvarer',
       'Drikkevarer',
@@ -18,6 +18,11 @@ describe('displayCategoryLabel', () => {
       'Kolonial',
       'Andet',
     ])
+  })
+
+  it('translates the stored "Cheese" default to "Ost og pålæg"', () => {
+    expect(displayCategoryLabel('Cheese')).toBe('Ost og pålæg')
+    expect(displayCategoryLabel('cheese')).toBe('Ost og pålæg')
   })
 
   it('matches case-insensitively', () => {
